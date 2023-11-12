@@ -1,10 +1,11 @@
 using System.Collections.Generic;
-using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using RFW.Events;
+using UnityEngine;
 
 namespace RFW
 {
-    public class PlayerFactory : UnitsFactory
+    public class PlayerFactory : UnitsFactory, IPlayerFactory
     {
         private string _playerId = default;
 
@@ -13,13 +14,15 @@ namespace RFW
             _playerId = playerId;
         }
 
-        public async Task<UnitBase> CreatePlayer()
+        public async UniTask<UnitBase> CreatePlayerAsync(Vector3 position)
         {
             List<IUnitSystem> systems = new List<IUnitSystem>();
 
             systems.Add(new HitPointSystem());
 
-            UnitBase unit = await CreateUnit<UnitBase>(_playerId, systems);
+            UnitBase unit = await CreateUnitAsync<UnitBase>(_playerId, systems, position);
+
+            _unitEvents.OnUnitCreated?.Invoke(unit);
             return unit;
         }
     }

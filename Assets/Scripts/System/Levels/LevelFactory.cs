@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
 
-namespace RFW
+namespace RFW.Levels
 {
     public class LevelFactory : ILevelFactory
     {

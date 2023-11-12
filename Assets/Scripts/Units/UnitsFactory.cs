@@ -1,4 +1,4 @@
-using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using RFW.Events;
 using UnityEngine;
 
@@ -7,7 +7,7 @@ namespace RFW
     public class UnitsFactory : IUnitsFactory
     {
         private IGettableAsset _assetGetter = null;
-        private UnitEvents _unitEvents = null;
+        protected UnitEvents _unitEvents = null;
 
         public UnitsFactory(IGettableAsset assetGetter, UnitEvents unitEvents)
         {
@@ -15,7 +15,7 @@ namespace RFW
             _unitEvents = unitEvents;
         }
 
-        public async Task<T> CreateUnit<T>(string unitId, params object[] parameters)
+        public virtual async UniTask<T> CreateUnitAsync<T>(string unitId, params object[] parameters)
             where T :class, IUnit
         {
             IUnitView view = await _assetGetter.LoadResource<IUnitView>(unitId);

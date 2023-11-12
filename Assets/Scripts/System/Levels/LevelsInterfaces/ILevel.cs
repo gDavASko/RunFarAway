@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using RFW.Events;
 using UnityEngine;
 
-namespace RFW
+namespace RFW.Levels
 {
    public interface ILevel : IDisposable
    {

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using RFW.Events;
 using UnityEngine;
 
-namespace RFW
+namespace RFW.Levels
 {
     public class Level : MonoBehaviour, ILevel
     {

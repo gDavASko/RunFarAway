@@ -36,6 +36,9 @@ namespace RFW
             {
                 _sysDictionary[system.SystemType] = system;
             }
+
+            Vector3 position = parameters.Get<Vector3>();
+            UnitView.transform.position = position;
         }
 
         public void Dispose()

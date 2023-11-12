@@ -1,5 +1,6 @@
-using UnityEngine;
-
-public class UnitMarker : LevelMarker
+namespace RFW.Levels
 {
+    public class UnitMarker : LevelMarker
+    {
+    }
 }
