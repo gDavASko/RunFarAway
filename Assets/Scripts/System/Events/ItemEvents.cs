@@ -4,7 +4,7 @@ namespace RFW.Events
 {
     public class ItemEvents
     {
-        public System.Action<IGameItem> OnItemPlayerCollision
+        public System.Action<IUnit> OnItemPlayerCollision
         {
             get;
             set;

@@ -1,15 +1,18 @@
-using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 
-public class AddressableNonCachedAssetGetter : IGettableAsset
+namespace RFW
 {
-    public async Task<T> LoadResource<T>(string assetId)
+    public class AddressableNonCachedAssetGetter : IGettableAsset
     {
-        var handle = Addressables.InstantiateAsync(assetId);
-        var obj = await handle.Task;
-        if(obj.TryGetComponent(out T componentObj) == false)
-            Debug.LogError($"Try to get resourse with unknown asset id = {assetId}");
-        return componentObj;
+        public async UniTask<T> LoadResource<T>(string assetId)
+        {
+            var handle = Addressables.InstantiateAsync(assetId);
+            var obj = await handle.Task;
+            if (obj.TryGetComponent(out T componentObj) == false)
+                Debug.LogError($"Try to get resourse with unknown asset id = {assetId}");
+            return componentObj;
+        }
     }
 }

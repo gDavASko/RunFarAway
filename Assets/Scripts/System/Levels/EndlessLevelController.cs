@@ -1,16 +1,14 @@
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using RFW.Events;
 using UnityEngine;
 
 namespace RFW.Levels
 {
-    public class CycledLevelController : ILevelController
+    public class EndlessLevelController : ILevelController
     {
         public ILevel CurrentLevel => _currentLevel;
 
         private string[] _levelsOrderedIds = null;
-        private int _cycledFrom = 3;
 
         private ILevelFactory _levelFactory = null;
         private ILevel _currentLevel = null;
@@ -20,63 +18,65 @@ namespace RFW.Levels
         private ItemEvents _itemEvents = null;
 
 
-        public CycledLevelController(ILevelFactory levelFactory,
-            GameEvents gameEvents, UnitEvents unitEvents, ItemEvents itemEvents)
+        public EndlessLevelController(ILevelFactory levelFactory,
+            GameEvents gameEvents, UnitEvents unitEvents, ItemEvents itemEvents, IConfigGetter configs)
         {
             _levelFactory = levelFactory;
 
             _gameEvents = gameEvents;
             gameEvents.OnNextGame += OnNextGame;
             gameEvents.OnRestartGame += OnRestartGame;
+            gameEvents.OnGameLoaded += OnGameLoaded;
 
             _unitEvents = unitEvents;
             _itemEvents = itemEvents;
 
+            _levelsOrderedIds = configs.GetConfig<SOLevelsList>().GetLevels();
+        }
+
+        private void OnGameLoaded()
+        {
             LoadCurrent();
         }
 
-        public void LoadNext()
-        {
-            LoadLevelByNumber(0);
-        }
-
-        public void LoadCurrent()
-        {
-            LoadLevelByNumber(0);
-        }
-
-        private async void LoadLevelByNumber(int number)
+        public async void LoadNext()
         {
             if (_currentLevel != null)
                 UnloadLevel();
 
-            _currentLevel =
-                await _levelFactory.CreateLevel<ILevel>(GetLevelId(number));
+            _currentLevel = await _levelFactory.CreateLevel<ILevel>(GetNextLevelId());
             _currentLevel.Init(_gameEvents);
 
             InitUnits();
             InitItems();
         }
 
-        public int CyclicIndex(int curNumber)
+        public async void LoadCurrent()
         {
-            if (curNumber > _levelsOrderedIds.Length - 1)
+            if (_currentLevel == null)
             {
-                curNumber = _cycledFrom + (int)((curNumber - _cycledFrom) % (_levelsOrderedIds.Length - _cycledFrom));
+                LoadNext();
+            }
+            else
+            {
+                _currentLevel = await _levelFactory.CreateLevel<ILevel>(_currentLevel.Id);
+                _currentLevel.Init(_gameEvents);
             }
 
-            return curNumber;
+            InitUnits();
+            InitItems();
         }
 
-        private string GetLevelId(int levelNumber)
+        private string GetNextLevelId()
         {
-            int index = CyclicIndex(levelNumber);
-
-            return _levelsOrderedIds[index];
+            return _levelsOrderedIds.RandomElement();
         }
 
         private void InitItems()
         {
+            if (_currentLevel == null || _currentLevel.ItemsSpawnPoints == null)
+                return;
+
             foreach (KeyValuePair<string, Vector3> item in _currentLevel.ItemsSpawnPoints)
             {
                 _itemEvents.OnItemCreateRequest?.Invoke(item.Key, item.Value);
@@ -85,6 +85,9 @@ namespace RFW.Levels
 
         private void InitUnits()
         {
+            if (_currentLevel == null || _currentLevel.EnemySpawnPoints == null)
+                return;
+
             foreach (KeyValuePair<string, Vector3> unit in _currentLevel.EnemySpawnPoints)
             {
                 _unitEvents.OnUnitCreateRequest?.Invoke(unit.Key, unit.Value);

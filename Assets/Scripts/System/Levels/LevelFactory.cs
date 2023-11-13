@@ -1,4 +1,4 @@
-using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 
 namespace RFW.Levels
 {
@@ -12,7 +12,7 @@ namespace RFW.Levels
             _assetGetter = assetGetter;
         }
 
-        public async Task<T> CreateLevel<T>(string id) where T : class, ILevel
+        public async UniTask<T> CreateLevel<T>(string id) where T : class, ILevel
         {
             if (curLevel != null)
                 _assetGetter.UnloadResource();
