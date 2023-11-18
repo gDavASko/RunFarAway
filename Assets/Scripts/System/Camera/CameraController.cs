@@ -12,11 +12,11 @@ namespace RFW
 
         private UnitEvents _unitEvents = null;
         private GameEvents _gameEvents = null;
-        private IUnit _player = null;
+        private IUnitView _player = null;
         private Vector3 _velocity = default;
         private bool _isActiveCamera = false;
 
-        private void Construct(UnitEvents unitEvents, GameEvents gameEvents)
+        public void Construct(UnitEvents unitEvents, GameEvents gameEvents)
         {
             _unitEvents = unitEvents;
             _unitEvents.OnUnitCreated += OnUnitCreated;
@@ -31,13 +31,13 @@ namespace RFW
             if (!_isActiveCamera || _player == null)
                 return;
 
-            Vector3 targetPosition = _player.UnitView.transform.position + _cameraOffset;
+            Vector3 targetPosition = _player.transform.position + _cameraOffset;
             transform.position = Vector3.SmoothDamp(transform.position, targetPosition, ref _velocity, _smoothTime);
         }
 
-        private void OnUnitCreated(IUnit unit)
+        private void OnUnitCreated(IUnitView unit)
         {
-            if (unit.UnitView.transform.CompareTag("player"))
+            if (unit.transform.CompareTag("Player"))
             {
                 _player = unit;
             }

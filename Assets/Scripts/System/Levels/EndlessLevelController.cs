@@ -15,11 +15,10 @@ namespace RFW.Levels
 
         private GameEvents _gameEvents = null;
         private UnitEvents _unitEvents = null;
-        private ItemEvents _itemEvents = null;
 
 
         public EndlessLevelController(ILevelFactory levelFactory,
-            GameEvents gameEvents, UnitEvents unitEvents, ItemEvents itemEvents, IConfigGetter configs)
+            GameEvents gameEvents, UnitEvents unitEvents, IConfigGetter configs)
         {
             _levelFactory = levelFactory;
 
@@ -29,7 +28,6 @@ namespace RFW.Levels
             gameEvents.OnGameLoaded += OnGameLoaded;
 
             _unitEvents = unitEvents;
-            _itemEvents = itemEvents;
 
             _levelsOrderedIds = configs.GetConfig<SOLevelsList>().GetLevels();
         }
@@ -45,7 +43,7 @@ namespace RFW.Levels
                 UnloadLevel();
 
             _currentLevel = await _levelFactory.CreateLevel<ILevel>(GetNextLevelId());
-            _currentLevel.Init(_gameEvents);
+            InitLevel(_currentLevel);
 
             InitUnits();
             InitItems();
@@ -60,11 +58,16 @@ namespace RFW.Levels
             else
             {
                 _currentLevel = await _levelFactory.CreateLevel<ILevel>(_currentLevel.Id);
-                _currentLevel.Init(_gameEvents);
+                InitLevel(_currentLevel);
             }
 
             InitUnits();
             InitItems();
+        }
+
+        private void InitLevel(ILevel level)
+        {
+            level.Init(_gameEvents, _unitEvents);
         }
 
         private string GetNextLevelId()
@@ -79,7 +82,7 @@ namespace RFW.Levels
 
             foreach (KeyValuePair<string, Vector3> item in _currentLevel.ItemsSpawnPoints)
             {
-                _itemEvents.OnItemCreateRequest?.Invoke(item.Key, item.Value);
+                _unitEvents.OnUnitCreateRequest?.Invoke(item.Key, item.Value);
             }
         }
 

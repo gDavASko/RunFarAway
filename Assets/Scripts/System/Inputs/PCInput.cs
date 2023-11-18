@@ -6,20 +6,26 @@ namespace RFW
     public class PCInput : IInput, ITickable
     {
         private KeyCode _jumpKeyCode = KeyCode.Space;
+        private KeyCode _attackCode = KeyCode.LeftControl;
 
-        public Action<ActionType> OnAction { get; set; }
+        public Action<ActionType, bool> OnAction
+        {
+            get;
+            set;
+        }
 
-        public void Tick()
+        public void Tick(float deltaTime)
         {
             if (Input.GetMouseButtonDown(0) || Input.GetKeyDown(_jumpKeyCode))
             {
-                OnAction?.Invoke(ActionType.Jump);
+                OnAction?.Invoke(ActionType.Jump, true);
             }
 
-            if (Input.GetMouseButtonUp(0) || Input.GetKeyUp(_jumpKeyCode))
+            if (Input.GetMouseButtonUp(1) || Input.GetKeyUp(_attackCode))
             {
-                OnAction?.Invoke(ActionType.Attack);
+                OnAction?.Invoke(ActionType.Attack, true);
             }
+
         }
     }
 }

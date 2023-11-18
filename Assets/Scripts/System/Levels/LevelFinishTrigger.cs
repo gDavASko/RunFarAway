@@ -9,7 +9,7 @@ namespace RFW.Levels
 
         private void OnTriggerEnter2D(Collider2D col)
         {
-            if (col.CompareTag("player"))
+            if (col.CompareTag("Player"))
             {
                 OnLevelFinish?.Invoke();
             }

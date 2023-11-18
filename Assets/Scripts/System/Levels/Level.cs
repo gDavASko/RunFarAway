@@ -14,6 +14,7 @@ namespace RFW.Levels
         private List<KeyValuePair<string, Vector3>> _itemsSpawns = new List<KeyValuePair<string, Vector3>>();
 
         private GameEvents _gameEvents = null;
+        private UnitEvents _unitEvents = null;
 
         public string Id => _id;
         public Transform Transform => transform;
@@ -21,9 +22,12 @@ namespace RFW.Levels
         public List<KeyValuePair<string, Vector3>> EnemySpawnPoints => _enemiesSpawns;
         public List<KeyValuePair<string, Vector3>> ItemsSpawnPoints => _itemsSpawns;
 
-        public void Init(GameEvents gameEvents)
+        public void Init(params object[] parameters)
         {
-            _gameEvents = gameEvents;
+            _gameEvents = parameters.Get<GameEvents>();
+            _unitEvents = parameters.Get<UnitEvents>();
+
+            InitObjects();
         }
 
         private void Awake()
@@ -33,7 +37,7 @@ namespace RFW.Levels
 
                 foreach (var marker in markers)
                 {
-                    if (marker.Id != "player")
+                    if (marker.Id != "Player")
                     {
                         _enemiesSpawns.Add(new KeyValuePair<string, Vector3>(marker.Id, marker.transform.position));
                     }
@@ -56,14 +60,32 @@ namespace RFW.Levels
             _finishTrigger.OnLevelFinish += FinishLevel;
         }
 
+        public void Dispose()
+        {
+            Destroy(this.gameObject);
+        }
+
         private void FinishLevel()
         {
             _gameEvents.OnGameFinish?.Invoke(GameEvents.GameResult.Victory);
         }
 
-        public void Dispose()
+        private void InitObjects()
         {
-            Destroy(this.gameObject);
+            if (_playerSpawn != null)
+            {
+                _unitEvents.OnPlayerCreateRequest?.Invoke(_playerSpawn.transform.position);
+            }
+
+            foreach (var unit in _enemiesSpawns)
+            {
+                _unitEvents.OnUnitCreateRequest?.Invoke(unit.Key, unit.Value);
+            }
+
+            foreach (var item in _itemsSpawns)
+            {
+                _unitEvents.OnUnitCreateRequest?.Invoke(item.Key, item.Value);
+            }
         }
     }
 }

@@ -5,19 +5,18 @@ using UnityEngine;
 public class GameController: IDisposable
 {
     private GameEvents _gameEvents = null;
+    private UnitEvents _unitEvents = null;
 
     public GameController(GameEvents gameEvents)
     {
         _gameEvents = gameEvents;
         _gameEvents.OnGameLoaded += OnGameLoaded;
-
     }
 
     private void OnGameLoaded()
     {
         Debug.LogError("GameLoaded");
     }
-
 
     public void Dispose()
     {

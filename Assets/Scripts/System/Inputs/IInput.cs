@@ -2,6 +2,6 @@ namespace RFW
 {
     public interface IInput
     {
-        System.Action<ActionType> OnAction { get; set; }
+        System.Action<ActionType, bool> OnAction { get; set; }
     }
 }

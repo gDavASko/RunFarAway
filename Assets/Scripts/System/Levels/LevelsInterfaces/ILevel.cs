@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace RFW.Levels
 {
-   public interface ILevel : IDisposable
+   public interface ILevel : IDisposable, IInitializable
    {
       string Id { get; }
 
@@ -13,6 +13,5 @@ namespace RFW.Levels
       Vector3 PlayerSpawnPoint { get; }
       List<KeyValuePair<string, Vector3>> EnemySpawnPoints { get; }
       List<KeyValuePair<string, Vector3>> ItemsSpawnPoints { get; }
-      void Init(GameEvents gameEvents);
    }
 }

@@ -4,13 +4,19 @@ namespace RFW.Events
 {
     public class UnitEvents
     {
+        public System.Action<IUnitView, IUnitView> OnUnitsCollision
+        {
+            get;
+            set;
+        }
+
         public System.Action<IUnitDeathContext> OnUnitDeath
         {
             get;
             set;
         }
 
-        public System.Action<IUnit> OnUnitCreated
+        public System.Action<IUnitView> OnUnitCreated
         {
             get;
             set;

@@ -2,7 +2,7 @@
 
 namespace RFW
 {
-    public interface IUnitSystem
+    public interface IUnitSystem: IDisposable
     {
         Type SystemType
         {

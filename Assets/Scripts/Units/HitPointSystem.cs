@@ -53,5 +53,11 @@ namespace RFW
         {
             ChangeHitPointsTo(HitPoints + 1);
         }
+
+        public void Dispose()
+        {
+            OnDeath = null;
+            OnHPChanged = null;
+        }
     }
 }

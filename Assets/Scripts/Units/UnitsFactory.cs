@@ -1,5 +1,4 @@
 using Cysharp.Threading.Tasks;
-using RFW.Events;
 using UnityEngine;
 
 namespace RFW
@@ -7,16 +6,14 @@ namespace RFW
     public class UnitsFactory : IUnitsFactory
     {
         private IGettableAsset _assetGetter = null;
-        protected UnitEvents _unitEvents = null;
 
-        public UnitsFactory(IGettableAsset assetGetter, UnitEvents unitEvents)
+        public UnitsFactory(IGettableAsset assetGetter)
         {
             _assetGetter = assetGetter;
-            _unitEvents = unitEvents;
         }
 
-        public virtual async UniTask<T> CreateUnitAsync<T>(string unitId, params object[] parameters)
-            where T :class, IUnit
+        public virtual async UniTask<T> CreateUnitAsync<T>(string unitId, Vector3 position)
+            where T :class, IUnitView
         {
             IUnitView view = await _assetGetter.LoadResource<IUnitView>(unitId);
 
@@ -27,12 +24,9 @@ namespace RFW
                 return null;
             }
 
-            IUnit unit = new UnitBase();
-            unit.Init(view, parameters, _unitEvents);
+            view.transform.position = position;
 
-            _unitEvents.OnUnitCreated?.Invoke(unit);
-
-            return unit as T;
+            return view as T;
         }
     }
 }

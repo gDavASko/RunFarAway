@@ -5,6 +5,6 @@ namespace RFW
 {
     public interface IPlayerFactory: IUnitsFactory
     {
-        public UniTask<UnitBase> CreatePlayerAsync(Vector3 position);
+        public UniTask<IUnitView> CreatePlayerAsync(Vector3 position);
     }
 }
