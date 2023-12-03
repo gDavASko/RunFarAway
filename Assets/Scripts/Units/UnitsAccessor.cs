@@ -1,42 +1,44 @@
 using System;
 using Cysharp.Threading.Tasks;
 using RFW.Events;
-using UnityEngine;
 
 namespace RFW
 {
     public class UnitsAccessor : IDisposable
     {
-        private UnitEvents _unitEvents = null;
-
         private IPlayerFactory _playerFactory = null;
         private IUnitsFactory _unitsFactory = null;
 
-        public UnitsAccessor(IPlayerFactory playerFactory, IUnitsFactory unitsFactory, UnitEvents unitEvents)
+        private EventBinding<EventUnitCreateRequest> _eventUnitCreateRequest = null;
+        private EventBinding<EventPlayerCreateRequest> _eventPlayerCreateRequest = null;
+        
+        public UnitsAccessor(IPlayerFactory playerFactory, IUnitsFactory unitsFactory)
         {
             _playerFactory = playerFactory;
             _unitsFactory = unitsFactory;
 
-            _unitEvents = unitEvents;
-            _unitEvents.OnPlayerCreateRequest += OnPlayerCreateRequest;
-            _unitEvents.OnUnitCreateRequest += OnUnitCreateRequest;
+            _eventUnitCreateRequest = new EventBinding<EventUnitCreateRequest>(OnUnitCreateRequest);
+            EventBus<EventUnitCreateRequest>.Register(_eventUnitCreateRequest);
+            
+            _eventPlayerCreateRequest = new EventBinding<EventPlayerCreateRequest>(OnPlayerCreateRequest);
+            EventBus<EventPlayerCreateRequest>.Register(_eventPlayerCreateRequest);
         }
 
-        private void OnPlayerCreateRequest(Vector3 position)
+        private void OnPlayerCreateRequest(EventPlayerCreateRequest eventData)
         {
-            _playerFactory.CreatePlayerAsync(position).Forget();
+            _playerFactory.CreatePlayerAsync(eventData.Position).Forget();
         }
 
-        private void OnUnitCreateRequest(string unitId, Vector3 position)
+        private void OnUnitCreateRequest(EventUnitCreateRequest eventData)
         {
-            _unitsFactory.CreateUnitAsync<IUnitView>(unitId, position).Forget();
+            _unitsFactory.CreateUnitAsync<IUnitView>(eventData.UnitId, eventData.Position).Forget();
         }
 
         public void Dispose()
         {
-            _unitEvents.OnPlayerCreateRequest -= OnPlayerCreateRequest;
-            _unitEvents = null;
-
+            EventBus<EventUnitCreateRequest>.Unregister(_eventUnitCreateRequest);
+            EventBus<EventPlayerCreateRequest>.Unregister(_eventPlayerCreateRequest);
+            
             _playerFactory = null;
         }
     }

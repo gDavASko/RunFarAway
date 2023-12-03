@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using RFW.Events;
 using UnityEngine;
@@ -9,15 +7,13 @@ namespace RFW
     public class PlayerFactory : UnitsFactory, IPlayerFactory
     {
         private string _playerId = "Player";
-        private UnitEvents _unitEvents = null;
         private IInput _playerInput = null;
 
         private CurrentUnitContext _curPlayer = null;
 
-        public PlayerFactory(string playerId, IGettableAsset assetGetter, UnitEvents unitEvents, IInput input): base(assetGetter)
+        public PlayerFactory(string playerId, IGettableAsset assetGetter, IInput input): base(assetGetter)
         {
             _playerId = playerId;
-            _unitEvents = unitEvents;
             _playerInput = input;
         }
 
@@ -31,65 +27,25 @@ namespace RFW
             _curPlayer = new CurrentUnitContext(unit);
 
             HitPointSystem hpSystem = new HitPointSystem();
-            hpSystem.Init(unit, _unitEvents);
+            hpSystem.Init(unit);
             _curPlayer.AddSystem(hpSystem);
 
             UnitMoveController moveController = new UnitMoveController();
-            moveController.Init(unit, _playerInput, _unitEvents);
+            moveController.Init(unit, _playerInput);
             _curPlayer.AddSystem(moveController);
 
-            _unitEvents.OnUnitCreated?.Invoke(unit);
+            EventBus<EventUnitCreated>.Raise(new EventUnitCreated(unit.transform));
             return unit;
         }
-    }
 
-    public class CurrentUnitContext: IDisposable
-    {
-        private IUnitView _unitView = null;
-
-        private List<IUnitSystem> _systems = null;
-        private Dictionary<Type, IUnitSystem> _sysDictionary = null;
-
-        public CurrentUnitContext(IUnitView unit)
+        public override void Dispose()
         {
-            _unitView = unit;
-        }
-
-        public T GetSystem<T>() where T :class, IUnitSystem
-        {
-            if (_systems == null || !_sysDictionary.ContainsKey(typeof(T)))
-            {
-                Debug.LogError($"[{nameof(CurrentUnitContext)}] Try to get non exist " +
-                               $"system of type {nameof(T)} " +
-                               $"for unit <{_unitView.transform.name}>");
-                return null;
-            }
-
-            return _sysDictionary[typeof(T)] as T;
-        }
-
-        public void AddSystem<T>(T system) where T :class, IUnitSystem
-        {
-            if (_sysDictionary == null)
-                _sysDictionary = new Dictionary<Type, IUnitSystem>();
-
-            _sysDictionary[system.SystemType] = system;
-        }
-
-        public void Dispose()
-        {
-            _unitView.Dispose();
-
-            if (_sysDictionary != null)
-            {
-                foreach (IUnitSystem system in _sysDictionary.Values)
-                {
-                    system.Dispose();
-                }
-
-                _sysDictionary.Clear();
-                _sysDictionary = null;
-            }
+            _playerInput = null;
+            
+            _curPlayer?.Dispose();
+            _curPlayer = null;
+            
+            base.Dispose();
         }
     }
 }

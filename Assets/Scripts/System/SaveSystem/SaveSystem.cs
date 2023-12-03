@@ -151,5 +151,13 @@ namespace RFW.Saves
 
             parameters.Add(parameter);
         }
+
+        public void Dispose()
+        {
+            parameters?.Clear();
+            parameters = null;
+
+            OnValueChanged = null;
+        }
     }
 }

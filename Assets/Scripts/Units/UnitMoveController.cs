@@ -6,7 +6,6 @@ using UnityEngine;
 public class UnitMoveController : IMoveController, ITickable
 {
     private IInput _input = null;
-    private UnitEvents _unitEvents = null;
     private IUnitView _unitView = null;
     private UnitConfig _unitConfig;
 
@@ -19,8 +18,6 @@ public class UnitMoveController : IMoveController, ITickable
     public Type SystemType => typeof(IMoveController);
     public void Init(params object[] parameters)
     {
-        _unitEvents = parameters.Get<UnitEvents>();
-
         _input = parameters.Get<IInput>();
         _input.OnAction -= OnInputAction;
     }

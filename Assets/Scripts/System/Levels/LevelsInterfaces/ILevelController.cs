@@ -1,6 +1,8 @@
+using System;
+
 namespace RFW.Levels
 {
-    public interface ILevelController
+    public interface ILevelController: IDisposable
     {
         ILevel CurrentLevel { get; }
 

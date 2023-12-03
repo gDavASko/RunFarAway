@@ -28,5 +28,10 @@ namespace RFW
 
             return view as T;
         }
+
+        public virtual void Dispose()
+        {
+            _assetGetter = null;
+        }
     }
 }

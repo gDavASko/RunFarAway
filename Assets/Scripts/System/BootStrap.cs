@@ -30,9 +30,6 @@ namespace RFW
         private GameController _gameController = null;
         private UnitsAccessor _unitAccessor = null;
 
-        private UnitEvents _unitEvents = null;
-        private GameEvents _gameEvents = null;
-
         private async void Awake()
         {
             _assetGetter = new AddressableCachedAssetGetter();
@@ -41,26 +38,48 @@ namespace RFW
             await configs.LoadCofigsAsync(_configsIds, new AddressableCommonAssetGetter());
             _configs = configs;
 
-            _unitEvents = new UnitEvents();
-            _gameEvents = new GameEvents();
-
             _cameraController = Camera.main.GetComponent<CameraController>();
-            _cameraController.Construct(_unitEvents, _gameEvents);
+            _cameraController.Construct();
 
             _saves = new PrefsSaves();
 
             _playerInput = new PCInput();
-            _playerFactory = new PlayerFactory(PLAYER_ID, _assetGetter, _unitEvents, _playerInput);
+            _playerFactory = new PlayerFactory(PLAYER_ID, _assetGetter, _playerInput);
             _unitsFactory = new UnitsFactory(_assetGetter);
-            _unitAccessor = new UnitsAccessor(_playerFactory, _unitsFactory, _unitEvents);
+            _unitAccessor = new UnitsAccessor(_playerFactory, _unitsFactory);
 
             _levelFactory = new LevelFactory(_assetGetter);
-            _levelController = new EndlessLevelController(_levelFactory,
-                _gameEvents, _unitEvents, _configs);
+            _levelController = new EndlessLevelController(_levelFactory, _configs);
 
-            _gameController = new GameController(_gameEvents);
+            _gameController = new GameController();
 
-            _gameEvents.OnGameLoaded?.Invoke();
+            EventBus<EventEndload>.Raise(new EventEndload());
+        }
+
+        private void OnDestroy()
+        {
+            _cameraController = null;
+            
+            _unitAccessor.Dispose();
+            _unitAccessor = null;
+            _gameController.Dispose();
+            _gameController = null;
+            _saves.Dispose();
+            _saves = null;
+            _levelFactory.Dispose();
+            _levelFactory = null;
+            _unitsFactory.Dispose();
+            _unitsFactory = null;
+            _playerFactory.Dispose();
+            _playerFactory = null;
+            _playerInput.Dispose();
+            _playerInput = null;
+            _assetGetter.Dispose();
+            _assetGetter = null;
+            _levelController.Dispose();
+            _levelController = null;
+            _configs.Dispose();
+            _configs = null;
         }
     }
 }

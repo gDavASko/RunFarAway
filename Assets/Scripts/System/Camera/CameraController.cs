@@ -10,20 +10,25 @@ namespace RFW
         [SerializeField] private Vector3 _cameraOffset = default;
         [SerializeField] private Vector3 _initPosition = default;
 
-        private UnitEvents _unitEvents = null;
-        private GameEvents _gameEvents = null;
-        private IUnitView _player = null;
+        private Transform _player = null;
         private Vector3 _velocity = default;
         private bool _isActiveCamera = false;
 
-        public void Construct(UnitEvents unitEvents, GameEvents gameEvents)
-        {
-            _unitEvents = unitEvents;
-            _unitEvents.OnUnitCreated += OnUnitCreated;
+        private EventBinding<EventUnitCreated> _eventUnitCreated = null;
+        private EventBinding<EventGameStart> _eventGameStart = null;
+        private EventBinding<EventGameEnd> _eventGameEnd = null;
+        
 
-            _gameEvents = gameEvents;
-            _gameEvents.OnGameStart += OnGameStart;
-            _gameEvents.OnGameFinish += OnGameFinish;
+        public void Construct()
+        {
+            _eventUnitCreated = new EventBinding<EventUnitCreated>(OnUnitCreated);
+            EventBus<EventUnitCreated>.Register(_eventUnitCreated);
+
+            _eventGameStart = new EventBinding<EventGameStart>(OnGameStart);
+            EventBus<EventGameStart>.Register(_eventGameStart);
+            
+            _eventGameEnd = new EventBinding<EventGameEnd>(OnGameFinish);
+            EventBus<EventGameEnd>.Register(_eventGameEnd);
         }
 
         private void LateUpdate()
@@ -35,15 +40,15 @@ namespace RFW
             transform.position = Vector3.SmoothDamp(transform.position, targetPosition, ref _velocity, _smoothTime);
         }
 
-        private void OnUnitCreated(IUnitView unit)
+        private void OnUnitCreated(EventUnitCreated unit)
         {
-            if (unit.transform.CompareTag("Player"))
+            if (unit.UnitTransform.CompareTag("Player"))
             {
-                _player = unit;
+                _player = unit.UnitTransform;
             }
         }
 
-        private void OnGameFinish(GameEvents.GameResult obj)
+        private void OnGameFinish()
         {
             _isActiveCamera = false;
         }
@@ -57,12 +62,9 @@ namespace RFW
 
         public void Dispose()
         {
-            _unitEvents.OnUnitCreated -= OnUnitCreated;
-            _unitEvents = null;
-
-            _gameEvents.OnGameStart -= OnGameStart;
-            _gameEvents.OnGameFinish -= OnGameFinish;
-            _gameEvents = null;
+            EventBus<EventUnitCreated>.Unregister(_eventUnitCreated);
+            EventBus<EventGameStart>.Unregister(_eventGameStart);
+            EventBus<EventGameEnd>.Unregister(_eventGameEnd);
         }
     }
 }

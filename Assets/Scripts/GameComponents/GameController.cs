@@ -1,26 +1,27 @@
 using System;
-using RFW.Events;
 using UnityEngine;
+using RFW.Events;
 
-public class GameController: IDisposable
+namespace RFW
 {
-    private GameEvents _gameEvents = null;
-    private UnitEvents _unitEvents = null;
-
-    public GameController(GameEvents gameEvents)
+    public class GameController : IDisposable
     {
-        _gameEvents = gameEvents;
-        _gameEvents.OnGameLoaded += OnGameLoaded;
-    }
+        private EventBinding<EventEndload> _eventLoadEnd = null;
 
-    private void OnGameLoaded()
-    {
-        Debug.LogError("GameLoaded");
-    }
+        public GameController()
+        {
+            _eventLoadEnd = new EventBinding<EventEndload>(OnGameLoaded);
+            EventBus<EventEndload>.Register(_eventLoadEnd);
+        }
 
-    public void Dispose()
-    {
-        _gameEvents.OnGameLoaded -= OnGameLoaded;
-        _gameEvents = null;
+        private void OnGameLoaded()
+        {
+            Debug.LogError("GameLoaded");
+        }
+
+        public void Dispose()
+        {
+            EventBus<EventEndload>.Unregister(_eventLoadEnd);
+        }
     }
 }

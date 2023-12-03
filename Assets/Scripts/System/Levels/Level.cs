@@ -13,9 +13,6 @@ namespace RFW.Levels
         private List<KeyValuePair<string, Vector3>> _enemiesSpawns = new List<KeyValuePair<string, Vector3>>();
         private List<KeyValuePair<string, Vector3>> _itemsSpawns = new List<KeyValuePair<string, Vector3>>();
 
-        private GameEvents _gameEvents = null;
-        private UnitEvents _unitEvents = null;
-
         public string Id => _id;
         public Transform Transform => transform;
         public Vector3 PlayerSpawnPoint => _playerSpawn.position;
@@ -24,9 +21,6 @@ namespace RFW.Levels
 
         public void Init(params object[] parameters)
         {
-            _gameEvents = parameters.Get<GameEvents>();
-            _unitEvents = parameters.Get<UnitEvents>();
-
             InitObjects();
         }
 
@@ -67,24 +61,24 @@ namespace RFW.Levels
 
         private void FinishLevel()
         {
-            _gameEvents.OnGameFinish?.Invoke(GameEvents.GameResult.Victory);
+            EventBus<EventGameEnd>.Raise(new EventGameEnd(GameResult.Victory));
         }
 
         private void InitObjects()
         {
             if (_playerSpawn != null)
             {
-                _unitEvents.OnPlayerCreateRequest?.Invoke(_playerSpawn.transform.position);
+                EventBus<EventPlayerCreateRequest>.Raise(new EventPlayerCreateRequest(_playerSpawn.transform.position));
             }
 
             foreach (var unit in _enemiesSpawns)
             {
-                _unitEvents.OnUnitCreateRequest?.Invoke(unit.Key, unit.Value);
+                EventBus<EventUnitCreateRequest>.Raise(new EventUnitCreateRequest(unit.Key, unit.Value));
             }
 
             foreach (var item in _itemsSpawns)
             {
-                _unitEvents.OnUnitCreateRequest?.Invoke(item.Key, item.Value);
+                EventBus<EventUnitCreateRequest>.Raise(new EventUnitCreateRequest(item.Key, item.Value));
             }
         }
     }

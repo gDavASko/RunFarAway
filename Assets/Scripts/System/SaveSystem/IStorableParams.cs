@@ -1,6 +1,8 @@
-﻿namespace RFW.Saves
+﻿using System;
+
+namespace RFW.Saves
 {
-    public interface IStorableParams
+    public interface IStorableParams: IDisposable
     {
         System.Action<SaveKey>  OnValueChanged { get; set; }
 

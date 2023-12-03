@@ -18,5 +18,10 @@ namespace RFW
             Addressables.ReleaseInstance(_cachedObj);
             _cachedObj = null;
         }
+        
+        public void Dispose()
+        {
+            _cachedObj = null;
+        }
     }
 }

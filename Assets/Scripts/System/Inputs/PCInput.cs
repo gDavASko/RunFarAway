@@ -27,5 +27,10 @@ namespace RFW
             }
 
         }
+
+        public void Dispose()
+        {
+            OnAction = null;
+        }
     }
 }

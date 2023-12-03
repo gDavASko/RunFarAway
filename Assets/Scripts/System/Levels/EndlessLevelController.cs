@@ -13,21 +13,22 @@ namespace RFW.Levels
         private ILevelFactory _levelFactory = null;
         private ILevel _currentLevel = null;
 
-        private GameEvents _gameEvents = null;
-        private UnitEvents _unitEvents = null;
+        private readonly EventBinding<EventGameRestart> _eventGameRestart = null;
+        private readonly EventBinding<EventGameLoadNext> _eventGameLoadNext = null;
+        private readonly EventBinding<EventEndload> _eventGameLoaded = null;
 
-
-        public EndlessLevelController(ILevelFactory levelFactory,
-            GameEvents gameEvents, UnitEvents unitEvents, IConfigGetter configs)
+        public EndlessLevelController(ILevelFactory levelFactory, IConfigGetter configs)
         {
             _levelFactory = levelFactory;
 
-            _gameEvents = gameEvents;
-            gameEvents.OnNextGame += OnNextGame;
-            gameEvents.OnRestartGame += OnRestartGame;
-            gameEvents.OnGameLoaded += OnGameLoaded;
+            _eventGameRestart = new EventBinding<EventGameRestart>(OnRestartGame);
+            EventBus<EventGameRestart>.Register(_eventGameRestart);
+            
+            _eventGameLoadNext = new EventBinding<EventGameLoadNext>(OnNextGame);
+            EventBus<EventGameLoadNext>.Register(_eventGameLoadNext);
 
-            _unitEvents = unitEvents;
+            _eventGameLoaded = new EventBinding<EventEndload>(OnGameLoaded);
+            EventBus<EventEndload>.Register(_eventGameLoaded);
 
             _levelsOrderedIds = configs.GetConfig<SOLevelsList>().GetLevels();
         }
@@ -67,7 +68,7 @@ namespace RFW.Levels
 
         private void InitLevel(ILevel level)
         {
-            level.Init(_gameEvents, _unitEvents);
+            level.Init();
         }
 
         private string GetNextLevelId()
@@ -82,7 +83,7 @@ namespace RFW.Levels
 
             foreach (KeyValuePair<string, Vector3> item in _currentLevel.ItemsSpawnPoints)
             {
-                _unitEvents.OnUnitCreateRequest?.Invoke(item.Key, item.Value);
+                EventBus<EventUnitCreateRequest>.Raise(new EventUnitCreateRequest(item.Key, item.Value));
             }
         }
 
@@ -93,7 +94,7 @@ namespace RFW.Levels
 
             foreach (KeyValuePair<string, Vector3> unit in _currentLevel.EnemySpawnPoints)
             {
-                _unitEvents.OnUnitCreateRequest?.Invoke(unit.Key, unit.Value);
+                EventBus<EventUnitCreateRequest>.Raise(new EventUnitCreateRequest(unit.Key, unit.Value));
             }
         }
 
@@ -110,6 +111,13 @@ namespace RFW.Levels
         private void OnNextGame()
         {
             LoadNext();
+        }
+
+        public void Dispose()
+        {
+            EventBus<EventEndload>.Unregister(_eventGameLoaded);
+            EventBus<EventGameRestart>.Unregister(_eventGameRestart);
+            EventBus<EventGameLoadNext>.Unregister(_eventGameLoadNext);
         }
     }
 }

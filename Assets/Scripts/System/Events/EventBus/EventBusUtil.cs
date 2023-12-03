@@ -66,7 +66,10 @@ namespace RFW.Events
             {
                 var busType = typedef.MakeGenericType(eventType);
                 eventBusTypes.Add(busType);
+
+#if DEBUG_LOG
                 Debug.Log($"Initialized EventBus<{eventType.Name}>");
+#endif
             }
 
             return eventBusTypes;
@@ -77,7 +80,10 @@ namespace RFW.Events
         /// </summary>
         public static void ClearAllBuses()
         {
+#if DEBUG_LOG
             Debug.Log("Clearing all buses...");
+#endif
+
             for (int i = 0; i < EventBusTypes.Count; i++)
             {
                 var busType = EventBusTypes[i];

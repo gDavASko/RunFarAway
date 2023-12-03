@@ -20,5 +20,13 @@ namespace RFW.Levels
             curLevel = await _assetGetter.LoadResource<T>(id);
             return curLevel as T;
         }
+
+        public void Dispose()
+        {
+            _assetGetter = null;
+            
+            curLevel?.Dispose();
+            curLevel = null;
+        }
     }
 }

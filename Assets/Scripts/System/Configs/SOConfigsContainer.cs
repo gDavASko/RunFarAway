@@ -47,5 +47,11 @@ namespace RFW
             return default;
          }
       }
+
+      public void Dispose()
+      {
+         _dictConfigs.Clear();
+         _dictConfigs = null;
+      }
    }
 }
